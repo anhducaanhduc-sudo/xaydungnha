@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="vi"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260714-05-1435aa9"}');</script><script src="/_sdk/f432b76fb310b513.telemetry_sdk.js" integrity="sha512-9FJQ55EKmmqhyyik8BhrMVfm0+iYYfb8uOlRsjtkxJMEI97qOVEI4PnHohDjQAtvAep0IOEpdQ64eki0sz62ug=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò Chơi Xây Nhà</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,700;9..144,800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #172018;
+      --paper: #fff8e8;
+      --yellow: #f8c943;
+      --orange: #eb7139;
+      --green: #315f4e;
+      --blue: #7db5c4;
+      --red: #c84c37;
+      --shadow: 0 13px 0 rgba(30, 44, 34, .13);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; }
+    body {
+      font-family: "DM Sans", sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; }
+    button:focus-visible {
+      outline: 4px solid #fff;
+      box-shadow: 0 0 0 7px var(--ink);
+    }
+
+    .display-font { font-family: "Fraunces", serif; }
+
+    .app-shell {
+      position: relative;
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      overflow: hidden;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(23,32,24,.035) 31px 32px);
+    }
+
+    .app-shell::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
+      opacity: .25;
+      background-image: radial-gradient(rgba(23,32,24,.11) .7px, transparent .7px);
+      background-size: 7px 7px;
+      mix-blend-mode: multiply;
+    }
+
+    .topbar {
+      border-bottom: 3px solid var(--ink);
+      box-shadow: 0 6px 0 rgba(23,32,24,.1);
+    }
+
+    .logo-stamp {
+      transform: rotate(-2deg);
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .progress-segment {
+      flex: 1;
+      height: 11px;
+      border: 2px solid var(--ink);
+      background: rgba(255,255,255,.3);
+      transition: background .3s ease, transform .3s ease;
+    }
+
+    .progress-segment.done {
+      background: var(--yellow);
+      transform: translateY(-2px);
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 18px 22px 24px;
+    }
+
+    .inventory-strip {
+      border: 3px solid var(--ink);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .inventory-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 16px;
+      border-bottom: 3px solid var(--ink);
+    }
+
+    .sound-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 7px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: #fff8e8;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .inventory-items {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(76px, 1fr));
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .material-btn {
+      position: relative;
+      min-height: 93px;
+      padding: 9px 6px 7px;
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      background: #fffaf0;
+      box-shadow: 4px 4px 0 rgba(23,32,24,.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .25s ease, background .25s ease;
+    }
+
+    .material-btn:hover:not(:disabled) {
+      transform: translate(-2px,-3px) rotate(-.5deg);
+      box-shadow: 7px 7px 0 rgba(23,32,24,.22);
+    }
+
+    .material-btn.is-next {
+      background: #fff1a8;
+      animation: materialPulse 1.35s ease-in-out infinite;
+    }
+
+    .material-btn.is-locked { opacity: .56; }
+    .material-btn.is-done {
+      background: #b8e3b2;
+      opacity: .78;
+    }
+
+    .material-btn.is-done::after {
+      content: "✓";
+      position: absolute;
+      top: 5px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .material-icon {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      background: var(--yellow);
+    }
+
+    .material-name {
+      font-size: 12px;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .site-panel {
+      margin-top: 18px;
+      border: 3px solid var(--ink);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .site-scene {
+      position: relative;
+      min-height: 530px;
+      overflow: hidden;
+      isolation: isolate;
+      background: #9bc4cb;
+    }
+
+    .site-photo {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .58;
+      filter: saturate(.78) contrast(.9);
+      transition: opacity .45s ease, transform .8s ease;
+    }
+
+    .site-photo.hidden-site {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .site-scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(180deg, rgba(137,202,218,.28) 0 45%, rgba(238,211,151,.48) 68%, rgba(142,101,56,.7) 100%);
+    }
+
+    .site-scene::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: -5%;
+      right: -5%;
+      bottom: -48px;
+      height: 33%;
+      border-top: 4px solid rgba(23,32,24,.5);
+      background:
+        repeating-linear-gradient(170deg, rgba(112,77,43,.13) 0 3px, transparent 3px 34px),
+        #b98a56;
+      transform: rotate(-1deg);
+    }
+
+    .site-label {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      z-index: 25;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 13px;
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--ink);
+      transform: rotate(-1deg);
+    }
+
+    .site-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 25;
+      padding: 8px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: var(--yellow);
+      font-weight: 800;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .house {
+      position: absolute;
+      left: 50%;
+      bottom: 55px;
+      width: min(68%, 720px);
+      height: 76%;
+      transform: translateX(-50%);
+      z-index: 6;
+      transition: opacity .35s ease;
+    }
+
+    .house.hidden-house { display: none; }
+
+    .build-part {
+      position: absolute;
+      opacity: 0;
+      transition: opacity .5s ease, transform .65s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .house .foundation {
+      left: 5%;
+      right: 5%;
+      bottom: 5%;
+      height: 13%;
+      border: 4px solid var(--ink);
+      background: repeating-linear-gradient(0deg, #ad4d34 0 15px, #e6a066 15px 18px);
+      transform: translateY(50px);
+    }
+
+    .house .walls {
+      left: 11%;
+      right: 11%;
+      bottom: 17%;
+      height: 49%;
+      border: 4px solid var(--ink);
+      transform: scaleY(.12);
+      transform-origin: bottom;
+    }
+
+    .house .paint-layer {
+      left: 12%;
+      right: 12%;
+      bottom: 18%;
+      height: 47%;
+      border: 3px solid var(--ink);
+      transform: scaleX(.12);
+    }
+
+    .house .roof {
+      left: 2%;
+      right: 2%;
+      bottom: 64%;
+      height: 33%;
+      border: 4px solid var(--ink);
+      transform: translateY(-45px);
+    }
+
+    .house .frame {
+      left: 10%;
+      right: 10%;
+      bottom: 17%;
+      height: 55%;
+      opacity: .2;
+      animation: frameFlash 1.2s ease-in-out infinite;
+    }
+
+    .frame-line {
+      position: absolute;
+      background: rgba(255,255,255,.28);
+      border: 4px dashed #fff8d8;
+      filter: drop-shadow(0 0 4px rgba(23,32,24,.65));
+    }
+
+    .frame-line.v { width: 4%; height: 100%; bottom: 0; }
+    .frame-line.h { height: 7%; width: 100%; left: 0; }
+
+    .house .tools-flash {
+      left: 25%;
+      right: 25%;
+      bottom: 35%;
+      height: 35%;
+      border: 5px dashed #fff4a6;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 12px #fff4a6);
+      transform: scale(.4);
+    }
+
+    .house .details {
+      inset: 0;
+      transform: translateY(25px);
+    }
+
+    .window {
+      position: absolute;
+      bottom: 28%;
+      width: 19%;
+      height: 22%;
+      border: 6px solid var(--green);
+      box-shadow: inset 0 0 0 3px var(--ink);
+      background: linear-gradient(135deg,#a8d9e5,#e8fbff);
+    }
+
+    .window::before, .window::after {
+      content: "";
+      position: absolute;
+      background: var(--green);
+    }
+
+    .window::before { width: 4px; inset-block: 0; left: 50%; }
+    .window::after { height: 4px; inset-inline: 0; top: 50%; }
+    .window.left { left: 20%; }
+    .window.right { right: 20%; }
+
+    .door {
+      position: absolute;
+      left: 43%;
+      bottom: 17%;
+      width: 14%;
+      height: 34%;
+      border: 5px solid var(--ink);
+      border-radius: 28px 28px 0 0;
+      background: #754b32;
+    }
+
+    .door::after {
+      content: "";
+      position: absolute;
+      right: 13%;
+      top: 52%;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+
+    .house .interior {
+      left: 24%;
+      right: 24%;
+      bottom: 17%;
+      height: 20%;
+      transform: scale(.4);
+    }
+
+    .sofa {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 52%;
+      height: 54%;
+      border: 4px solid var(--ink);
+      border-radius: 14px 14px 4px 4px;
+      background: #e66f48;
+    }
+
+    .plant {
+      position: absolute;
+      right: 3%;
+      bottom: 0;
+      font-size: clamp(36px, 4vw, 58px);
+    }
+
+    .house.traditional .walls {
+      background:
+        repeating-linear-gradient(0deg, transparent 0 23px, rgba(90,40,25,.2) 23px 25px),
+        #c96a49;
+    }
+
+    .house.traditional .paint-layer { background: #f1d880; }
+    .house.traditional .roof {
+      background: repeating-linear-gradient(100deg,#a7392d 0 21px,#d35c3c 21px 27px);
+      clip-path: polygon(50% 0,100% 82%,92% 100%,8% 100%,0 82%);
+    }
+
+    .house.modern { width: min(64%, 680px); }
+    .house.modern .walls {
+      left: 8%;
+      right: 8%;
+      height: 58%;
+      background: #dad5c8;
+    }
+
+    .house.modern .paint-layer {
+      left: 9%;
+      right: 9%;
+      height: 56%;
+      background: linear-gradient(90deg,#f4efe3 0 62%,#c7663e 62% 100%);
+    }
+
+    .house.modern .roof {
+      left: 5%;
+      right: 5%;
+      bottom: 72%;
+      height: 9%;
+      background: #293a3e;
+      clip-path: none;
+    }
+
+    .house.modern .window.left {
+      left: 15%;
+      width: 26%;
+      height: 29%;
+    }
+
+    .house.modern .window.right {
+      right: 14%;
+      width: 23%;
+      height: 38%;
+    }
+
+    .house.modern .door {
+      left: 47%;
+      width: 12%;
+      border-radius: 0;
+      background: #253d43;
+    }
+
+    .house.garden { width: min(75%, 780px); }
+    .house.garden .walls {
+      left: 7%;
+      right: 7%;
+      height: 43%;
+      background: #d7a765;
+    }
+
+    .house.garden .paint-layer {
+      left: 8%;
+      right: 8%;
+      height: 41%;
+      background: #dce5b8;
+    }
+
+    .house.garden .roof {
+      left: 1%;
+      right: 1%;
+      bottom: 58%;
+      height: 30%;
+      background: repeating-linear-gradient(90deg,#446c48 0 24px,#688a55 24px 30px);
+      clip-path: polygon(50% 0,100% 75%,94% 100%,6% 100%,0 75%);
+    }
+
+    .house.garden .window { bottom: 25%; }
+    .house.garden .door { bottom: 17%; }
+
+    .stage-1 .foundation,
+    .stage-2 .foundation, .stage-2 .frame,
+    .stage-3 .foundation, .stage-3 .frame, .stage-3 .tools-flash,
+    .stage-4 .foundation, .stage-4 .frame, .stage-4 .walls, .stage-4 .tools-flash,
+    .stage-5 .foundation, .stage-5 .frame, .stage-5 .walls, .stage-5 .paint-layer,
+    .stage-6 .foundation, .stage-6 .frame, .stage-6 .walls, .stage-6 .paint-layer, .stage-6 .roof,
+    .stage-7 .foundation, .stage-7 .frame, .stage-7 .walls, .stage-7 .paint-layer, .stage-7 .roof, .stage-7 .details, .stage-7 .interior {
+      opacity: 1;
+      transform: none;
+    }
+
+    .stage-2 .frame, .stage-3 .frame, .stage-4 .frame,
+    .stage-5 .frame, .stage-6 .frame, .stage-7 .frame { opacity: .38; }
+
+    .stage-4 .tools-flash, .stage-5 .tools-flash,
+    .stage-6 .tools-flash, .stage-7 .tools-flash { opacity: 0; }
+
+    .crew {
+      position: absolute;
+      right: 5%;
+      bottom: 38px;
+      z-index: 16;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .worker {
+      position: relative;
+      width: 56px;
+      height: 104px;
+      transform-origin: bottom;
+    }
+
+    .worker-head {
+      position: absolute;
+      top: 8px;
+      left: 14px;
+      width: 29px;
+      height: 29px;
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+      background: #b8754a;
+    }
+
+    .worker-head::before {
+      content: "";
+      position: absolute;
+      left: -7px;
+      top: -10px;
+      width: 39px;
+      height: 16px;
+      border: 3px solid var(--ink);
+      border-radius: 18px 18px 5px 5px;
+      background: var(--yellow);
+    }
+
+    .worker-body {
+      position: absolute;
+      left: 9px;
+      top: 39px;
+      width: 39px;
+      height: 43px;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      background: var(--orange);
+    }
+
+    .worker-body::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: #fff4b4;
+    }
+
+    .leg {
+      position: absolute;
+      bottom: 0;
+      width: 12px;
+      height: 30px;
+      border: 3px solid var(--ink);
+      background: var(--green);
+    }
+
+    .leg.a { left: 12px; transform: rotate(5deg); }
+    .leg.b { right: 12px; transform: rotate(-5deg); }
+    .crew.is-building .worker:first-child { animation: workerBuild .45s ease-in-out 4; }
+    .crew.is-building .worker:last-child { animation: workerHop .55s ease-in-out 3 .1s; }
+
+    .dust {
+      position: absolute;
+      left: 50%;
+      bottom: 56px;
+      z-index: 14;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #f4e3b5;
+      opacity: 0;
+    }
+
+    .dust.burst { animation: dustBurst 1.1s ease-out; }
+
+    .status-board {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 22px;
+      border-top: 3px solid var(--ink);
+    }
+
+    .status-icon {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      overflow-y: auto;
+      background: rgba(20,30,24,.74);
+      backdrop-filter: blur(9px) saturate(.7);
+    }
+
+    .overlay.hidden { display: none; }
+
+    .dialog-card {
+      width: min(760px,100%);
+      max-height: calc(92 * min(var(--vh, 1vh), 1vh));
+      overflow-y: auto;
+      border: 4px solid var(--ink);
+      border-radius: 20px;
+      box-shadow: 12px 12px 0 rgba(0,0,0,.45);
+      animation: cardIn .4s cubic-bezier(.2,.9,.2,1);
+    }
+
+    .question-ribbon {
+      padding: 15px 20px;
+      border-bottom: 3px solid var(--ink);
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .question-body { padding: 22px; }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .answer-btn {
+      min-height: 72px;
+      padding: 11px;
+      display: grid;
+      grid-template-columns: 39px 1fr;
+      gap: 11px;
+      align-items: center;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      background: #fffdf6;
+      text-align: left;
+      box-shadow: 4px 4px 0 rgba(23,32,24,.22);
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #fff0ad;
+    }
+
+    .answer-btn.correct { background: #b8e3b2; }
+    .answer-btn.wrong { background: #f5b2a5; }
+
+    .answer-letter {
+      width: 37px;
+      height: 37px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+      font-weight: 800;
+    }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 14px;
+      border: 2px dashed var(--ink);
+      border-radius: 12px;
+    }
+
+    .feedback.hidden { display: none; }
+    .feedback.success { background: #d9efd0; }
+    .feedback.error { background: #f8d2c8; }
+
+    .action-btn {
+      min-height: 49px;
+      padding: 11px 19px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      box-shadow: 5px 5px 0 var(--ink);
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .action-btn:hover {
+      transform: translate(2px,2px);
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .complete-card {
+      position: relative;
+      width: min(850px,100%);
+      padding: 30px;
+      overflow: hidden;
+      text-align: center;
+      border: 5px solid var(--ink);
+      border-radius: 26px;
+      box-shadow: 14px 14px 0 rgba(0,0,0,.42);
+      animation: finishIn .65s cubic-bezier(.17,.89,.32,1.25);
+    }
+
+    .house-medal {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+
+    .site-dots {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin: 20px 0;
+    }
+
+    .site-dot {
+      width: 42px;
+      height: 14px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: rgba(255,255,255,.55);
+    }
+
+    .site-dot.done { background: #88c96b; }
+
+    .confetti-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -12%;
+      width: 10px;
+      height: 18px;
+      border: 2px solid var(--ink);
+      animation: confettiFall 3s linear infinite;
+    }
+
+    .shake { animation: shake .36s ease; }
+
+    @keyframes materialPulse {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes frameFlash {
+      0%,100% { opacity: .2; }
+      50% { opacity: .6; }
+    }
+    @keyframes workerBuild {
+      0%,100% { transform: rotate(0); }
+      50% { transform: rotate(-10deg) translateY(-4px); }
+    }
+    @keyframes workerHop {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+    @keyframes dustBurst {
+      0% { opacity: .9; transform: scale(.4); box-shadow: 0 0 #f4e3b5; }
+      100% { opacity: 0; transform: translate(-120px,-75px) scale(3); box-shadow: 80px 30px #f4e3b5,150px -10px #f4e3b5,-80px 20px #f4e3b5; }
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(22px) scale(.94) rotate(-1deg); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes finishIn {
+      from { opacity: 0; transform: scale(.75) rotate(-3deg); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(850px) rotate(720deg); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(7px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    @media (max-width: 820px) {
+      .main-content { padding: 14px; }
+      .inventory-items {
+        grid-template-columns: repeat(7, minmax(70px, 1fr));
+        overflow-x: auto;
+      }
+      .material-btn { min-width: 76px; }
+      .site-scene { min-height: 475px; }
+      .house { width: 86%; height: 69%; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar-inner { align-items: flex-start; }
+      .answer-grid { grid-template-columns: 1fr; }
+      .inventory-top { align-items: flex-start; }
+      .inventory-hint { display: none; }
+      .site-scene { min-height: 405px; }
+      .house, .house.modern, .house.garden { width: 94%; height: 65%; }
+      .crew { right: 0; transform: scale(.76); transform-origin: bottom right; }
+      .site-badge { top: 66px; right: 12px; font-size: 12px; }
+      .status-board { align-items: flex-start; }
+      .complete-card { padding: 24px 17px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+  <script src="/_sdk/0179d719c431a79e.data_sdk.js" type="text/javascript" integrity="sha512-OsRvJkI5GkC3MJQcgotQYotpzrMSX415GiKKgvYdxQEEkzD/fdchShO2FMSy0PJr/tiINMXOk5Vl2zAgg6bUiA=="></script>
+  <script src="/_sdk/9432170dbd2ae0df.resizing_sdk.js" type="text/javascript" integrity="sha512-FeT+58sb1f9ejWPWFjCbJvTT+SDwGV+ngrHUnlO7TWEOoqwOLj6p256kO3vOL7DIWl1cIgrobiof8v2bOigwPg=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: linear-gradient(135deg, rgb(247, 239, 217), rgb(231, 212, 169));">
+  <div class="app-shell">
+   <header data-template-id="header-section" class="canva-header topbar w-full" style="background: rgb(49, 95, 78);">
+    <div class="topbar-inner max-w-[1500px] mx-auto px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+     <div class="flex items-center gap-4 min-w-0">
+      <div class="logo-stamp bg-[#f8c943] rounded-lg p-2.5" aria-hidden="true">
+       <i data-lucide="hard-hat" class="w-7 h-7"></i>
+      </div>
+      <div class="min-w-0">
+       <h1 data-template-id="game-title" class="canva-text display-font leading-none" style="color: rgb(255, 248, 232); font-weight: 800; font-style: normal; font-size: 34px; letter-spacing: -0.04rem;">XƯỞNG XÂY NHÀ</h1>
+       <p data-template-id="game-subtitle" class="canva-text mt-1" style="color: rgb(220, 235, 220); font-weight: 600; font-style: normal; font-size: 15px;">3 công trường • 3 căn nhà • 21 thử thách</p>
+      </div>
+     </div>
+     <div class="w-full sm:w-auto sm:min-w-[340px]">
+      <div class="flex justify-between items-center gap-3 mb-2">
+       <span id="site-progress-text" class="font-extrabold text-[#fff8e8]">Công trường 1 / 3</span> <span id="progress-count" class="font-extrabold text-[#fff8e8] tabular-nums" aria-live="polite">0 / 7</span>
+      </div>
+      <div class="flex gap-1.5" aria-label="Tiến độ công trường">
+       <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span> <span class="progress-segment rounded-full"></span>
+      </div>
+     </div>
+    </div>
+   </header>
+   <main class="main-content">
+    <section data-template-id="inventory-panel" class="canva-panel inventory-strip" aria-labelledby="inventory-title" style="background: rgb(235, 113, 57);">
+     <div class="inventory-top">
+      <div>
+       <div class="flex items-center gap-2.5">
+        <i data-lucide="warehouse" class="w-6 h-6" aria-hidden="true"></i>
+        <h2 id="inventory-title" data-template-id="inventory-title" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 23px;">KHO VẬT TƯ</h2>
+       </div>
+       <p data-template-id="inventory-hint" class="canva-text inventory-hint mt-1" style="color: rgb(60, 38, 30); font-weight: 600; font-style: normal; font-size: 14px;">Nhấn trực tiếp vào biểu tượng vật tư đang phát sáng.</p>
+      </div><button id="sound-button" type="button" class="sound-btn" aria-pressed="true"> <i data-lucide="volume-2" class="sound-on-icon w-5 h-5" aria-hidden="true"></i> <i data-lucide="volume-x" class="sound-off-icon w-5 h-5 hidden" aria-hidden="true"></i> <span class="sound-on-text" data-template-id="sound-on-label" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px;">Âm thanh</span> <span class="sound-off-text hidden" data-template-id="sound-off-label" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px;">Đã tắt</span> </button>
+     </div>
+     <div class="inventory-items" role="list" aria-label="Danh sách vật tư">
+      <button type="button" class="material-btn is-next" data-item="0" aria-label="Chọn viên gạch"> <span class="material-icon" aria-hidden="true"><i data-lucide="square" class="w-6 h-6"></i></span> <span data-template-id="item-brick" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Viên gạch</span> </button> <button type="button" class="material-btn is-locked" data-item="1" aria-label="Chọn thanh sắt"> <span class="material-icon" aria-hidden="true"><i data-lucide="minus" class="w-6 h-6"></i></span> <span data-template-id="item-steel" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Thanh sắt</span> </button> <button type="button" class="material-btn is-locked" data-item="2" aria-label="Chọn búa"> <span class="material-icon" aria-hidden="true"><i data-lucide="hammer" class="w-6 h-6"></i></span> <span data-template-id="item-hammer" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Búa</span> </button> <button type="button" class="material-btn is-locked" data-item="3" aria-label="Chọn cờ lê"> <span class="material-icon" aria-hidden="true"><i data-lucide="wrench" class="w-6 h-6"></i></span> <span data-template-id="item-wrench" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Cờ lê</span> </button> <button type="button" class="material-btn is-locked" data-item="4" aria-label="Chọn sơn"> <span class="material-icon" aria-hidden="true"><i data-lucide="palette" class="w-6 h-6"></i></span> <span data-template-id="item-paint" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Sơn</span> </button> <button type="button" class="material-btn is-locked" data-item="5" aria-label="Chọn gạch ngói"> <span class="material-icon" aria-hidden="true"><i data-lucide="home" class="w-6 h-6"></i></span> <span data-template-id="item-roof" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Gạch ngói</span> </button> <button type="button" class="material-btn is-locked" data-item="6" aria-label="Chọn đồ nội thất"> <span class="material-icon" aria-hidden="true"><i data-lucide="armchair" class="w-6 h-6"></i></span> <span data-template-id="item-furniture" class="canva-text material-name" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 12px;">Nội thất</span> </button>
+     </div>
+    </section>
+    <section data-template-id="construction-panel" class="canva-panel site-panel" aria-labelledby="site-name-1" style="background: rgb(255, 248, 232);">
+     <div id="site-scene" class="site-scene">
+      <img data-template-id="site-image-1" class="canva-image site-photo" loading="lazy" src="https://images.pexels.com/photos/37175862/pexels-photo-37175862.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1280" alt="Wood framing of a house under construction in a sunny California subdivision."> <img data-template-id="site-image-2" class="canva-image site-photo hidden-site" loading="lazy" src="https://images.pexels.com/photos/37175980/pexels-photo-37175980.jpeg" alt="A new housing development under construction in Elk Grove, California with visible scaffolding and materials."> <img data-template-id="site-image-3" class="canva-image site-photo hidden-site" loading="lazy" src="https://images.pexels.com/photos/20866822/pexels-photo-20866822.jpeg" alt="Scenic view of rural landscape with fields, palm trees, and a farmhouse.">
+      <div class="site-label bg-[#fff8e8]">
+       <i data-lucide="map-pin" class="w-5 h-5" aria-hidden="true"></i>
+       <h2 id="site-name-1" data-template-id="site-name-1" class="canva-text site-name" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px; letter-spacing: 0.06rem;">CÔNG TRƯỜNG 01</h2>
+       <h2 data-template-id="site-name-2" class="canva-text site-name hidden" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px; letter-spacing: 0.06rem;">CÔNG TRƯỜNG 02</h2>
+       <h2 data-template-id="site-name-3" class="canva-text site-name hidden" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px; letter-spacing: 0.06rem;">CÔNG TRƯỜNG 03</h2>
+      </div>
+      <div class="site-badge" aria-live="polite"><span id="house-type">Nhà mái ngói truyền thống</span>
+      </div>
+      <div class="house traditional stage-0" data-house="0" aria-label="Mô hình nhà mái ngói truyền thống">
+       <div class="build-part foundation"></div>
+       <div class="build-part walls"></div>
+       <div class="build-part paint-layer"></div>
+       <div class="build-part roof"></div>
+       <div class="build-part details">
+        <div class="window left"></div>
+        <div class="window right"></div>
+        <div class="door"></div>
+       </div>
+       <div class="build-part interior">
+        <div class="sofa"></div>
+        <div class="plant">
+         🌿
+        </div>
+       </div>
+       <div class="build-part frame" aria-hidden="true">
+        <span class="frame-line v" style="left:0"></span><span class="frame-line v" style="left:25%"></span> <span class="frame-line v" style="left:50%"></span><span class="frame-line v" style="left:75%"></span> <span class="frame-line v" style="right:0"></span><span class="frame-line h" style="bottom:0"></span> <span class="frame-line h" style="top:44%"></span>
+       </div>
+       <div class="build-part tools-flash"></div>
+      </div>
+      <div class="house modern stage-0 hidden-house" data-house="1" aria-label="Mô hình nhà phố hiện đại">
+       <div class="build-part foundation"></div>
+       <div class="build-part walls"></div>
+       <div class="build-part paint-layer"></div>
+       <div class="build-part roof"></div>
+       <div class="build-part details">
+        <div class="window left"></div>
+        <div class="window right"></div>
+        <div class="door"></div>
+       </div>
+       <div class="build-part interior">
+        <div class="sofa"></div>
+        <div class="plant">
+         🪴
+        </div>
+       </div>
+       <div class="build-part frame" aria-hidden="true">
+        <span class="frame-line v" style="left:0"></span><span class="frame-line v" style="left:33%"></span> <span class="frame-line v" style="left:66%"></span><span class="frame-line v" style="right:0"></span> <span class="frame-line h" style="bottom:0"></span><span class="frame-line h" style="top:45%"></span>
+       </div>
+       <div class="build-part tools-flash"></div>
+      </div>
+      <div class="house garden stage-0 hidden-house" data-house="2" aria-label="Mô hình nhà vườn xanh">
+       <div class="build-part foundation"></div>
+       <div class="build-part walls"></div>
+       <div class="build-part paint-layer"></div>
+       <div class="build-part roof"></div>
+       <div class="build-part details">
+        <div class="window left"></div>
+        <div class="window right"></div>
+        <div class="door"></div>
+       </div>
+       <div class="build-part interior">
+        <div class="sofa"></div>
+        <div class="plant">
+         🌴
+        </div>
+       </div>
+       <div class="build-part frame" aria-hidden="true">
+        <span class="frame-line v" style="left:0"></span><span class="frame-line v" style="left:25%"></span> <span class="frame-line v" style="left:50%"></span><span class="frame-line v" style="left:75%"></span> <span class="frame-line v" style="right:0"></span><span class="frame-line h" style="bottom:0"></span> <span class="frame-line h" style="top:45%"></span>
+       </div>
+       <div class="build-part tools-flash"></div>
+      </div>
+      <div id="crew" class="crew" aria-label="Đội thi công">
+       <div class="worker" aria-hidden="true">
+        <span class="worker-head"></span><span class="worker-body"></span> <span class="leg a"></span><span class="leg b"></span>
+       </div>
+       <div class="worker" aria-hidden="true">
+        <span class="worker-head"></span><span class="worker-body" style="background:#4f87a0"></span> <span class="leg a"></span><span class="leg b"></span>
+       </div>
+      </div>
+      <div id="dust" class="dust"></div>
+     </div>
+     <div class="status-board bg-[#fff8e8]">
+      <div class="status-icon" aria-hidden="true"><i data-lucide="clipboard-check" class="w-6 h-6"></i>
+      </div>
+      <div>
+       <h3 data-template-id="status-title" class="canva-text" style="color: rgb(49, 95, 78); font-weight: 800; font-style: normal; font-size: 14px; letter-spacing: 0.06rem;">NHẬT KÝ CÔNG TRƯỜNG</h3>
+       <p id="status-dynamic" class="mt-1 font-semibold leading-relaxed" aria-live="polite">Chọn biểu tượng Viên gạch đang phát sáng để bắt đầu đặt móng.</p>
+      </div>
+     </div>
+    </section>
+   </main>
+   <footer class="max-w-[1500px] mx-auto px-5 pb-5 text-center">
+    <p data-template-id="footer-tip" class="canva-text" style="color: rgb(75, 85, 63); font-weight: 500; font-style: normal; font-size: 14px;">Hoàn thành căn nhà hiện tại để mở công trường tiếp theo.</p>
+   </footer>
+  </div>
+  <div id="question-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="active-question-heading">
+   <section class="dialog-card bg-[#fff8e8]">
+    <div class="question-ribbon">
+     <div class="flex items-center gap-3">
+      <span class="w-10 h-10 rounded-full border-[3px] border-[#172018] bg-white grid place-items-center" aria-hidden="true"> <i data-lucide="brain-circuit" class="w-6 h-6"></i> </span>
+      <div>
+       <p data-template-id="quiz-eyebrow" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 13px; letter-spacing: 0.1rem;">THỬ THÁCH VẬT TƯ</p>
+       <p id="question-number" class="font-bold">Câu 1 / 7</p>
+      </div>
+     </div><span id="quiz-item-icon" class="text-4xl" aria-hidden="true">🧱</span>
+    </div>
+    <div class="question-body">
+     <div class="question-slide" data-question="0">
+      <h2 id="active-question-heading" data-template-id="q1-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Muốn ngôi nhà đứng vững, những viên gạch đầu tiên nên được dùng để làm gì?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q1-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Trang trí mái nhà</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q1-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Xây móng và tường</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q1-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Làm rèm cửa</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q1-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Lắp bóng đèn</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="1">
+      <h2 data-template-id="q2-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Thanh sắt trong khung nhà có nhiệm vụ quan trọng nhất là gì?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q2-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Làm nhà thơm hơn</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q2-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Làm cửa sổ trong suốt</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q2-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Gia cố kết cấu chịu lực</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q2-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Thay thế sơn tường</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="2">
+      <h2 data-template-id="q3-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Khi dùng búa tại công trường, việc nào là an toàn và đúng nhất?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q3-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đeo bảo hộ và đóng đinh đúng vị trí</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q3-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Vung búa khi có người đứng gần</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q3-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Để búa giữa lối đi</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q3-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Dùng cán búa để cắt dây điện</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="3">
+      <h2 data-template-id="q4-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Cờ lê thường được đội thi công dùng để làm việc gì?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q4-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Quét sơn lên tường</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q4-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Cưa gỗ thành tấm</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q4-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đo chiều dài căn phòng</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q4-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Siết hoặc tháo đai ốc</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="4">
+      <h2 data-template-id="q5-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Trước khi sơn tường, đội thi công nên làm gì để lớp sơn đẹp và bền?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q5-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Làm ướt toàn bộ sàn nhà</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q5-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Làm sạch và làm phẳng bề mặt</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q5-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đóng kín mọi cửa nhiều ngày</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q5-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đặt nội thất sát tường</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="5">
+      <h2 data-template-id="q6-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Các viên ngói nên được xếp như thế nào để mái hạn chế bị dột?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q6-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đặt cách xa nhau</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q6-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Xếp ngẫu nhiên theo màu</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q6-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Xếp chồng mí từ dưới lên</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q6-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Chỉ đặt quanh mép mái</span></button>
+      </div>
+     </div>
+     <div class="question-slide hidden" data-question="6">
+      <h2 data-template-id="q7-question" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 700; font-style: normal; font-size: 28px;">Khi sắp xếp nội thất, nguyên tắc nào giúp căn nhà tiện nghi và an toàn?</h2>
+      <div class="answer-grid">
+       <button type="button" class="answer-btn" data-answer="0"><span class="answer-letter">A</span><span data-template-id="q7-a" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Giữ lối đi thông thoáng</span></button> <button type="button" class="answer-btn" data-answer="1"><span class="answer-letter">B</span><span data-template-id="q7-b" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Chặn mọi cửa ra vào</span></button> <button type="button" class="answer-btn" data-answer="2"><span class="answer-letter">C</span><span data-template-id="q7-c" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Đặt đồ nặng trên kệ yếu</span></button> <button type="button" class="answer-btn" data-answer="3"><span class="answer-letter">D</span><span data-template-id="q7-d" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 600; font-style: normal; font-size: 16px;">Che kín các ổ thông gió</span></button>
+      </div>
+     </div>
+     <div id="feedback-success" class="feedback success hidden" role="status">
+      <h3 data-template-id="correct-title" class="canva-text" style="color: rgb(34, 77, 50); font-weight: 800; font-style: normal; font-size: 19px;">Chính xác! Hạng mục đã được duyệt.</h3>
+      <p data-template-id="correct-message" class="canva-text mt-1" style="color: rgb(49, 95, 60); font-weight: 500; font-style: normal; font-size: 16px;">Đội thi công đã sẵn sàng đưa vật tư vào lắp đặt.</p>
+      <div class="flex gap-3 mt-4"><button id="continue-button" type="button" data-template-id="continue-button" class="canva-button action-btn" style="background: rgb(49, 95, 78); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Tiếp tục thi công →</button>
+      </div>
+     </div>
+     <div id="feedback-error" class="feedback error hidden" role="alert">
+      <h3 data-template-id="wrong-title" class="canva-text" style="color: rgb(139, 46, 34); font-weight: 800; font-style: normal; font-size: 19px;">Chưa đúng rồi!</h3>
+      <p data-template-id="wrong-message" class="canva-text mt-1" style="color: rgb(123, 57, 47); font-weight: 500; font-style: normal; font-size: 16px;">Hãy xem lại các lựa chọn và thử thêm một lần nữa nhé.</p>
+      <div class="flex gap-3 mt-4"><button id="retry-button" type="button" data-template-id="retry-button" class="canva-button action-btn" style="background: rgb(235, 113, 57); color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 16px;">Thử lại</button>
+      </div>
+     </div>
+    </div>
+   </section>
+  </div>
+  <div id="edit-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+   <section class="dialog-card bg-[#fff8e8]" style="width: min(950px, 100%); max-height: calc(94 * min(var(--vh, 1vh), 1vh));">
+    <div class="question-ribbon">
+     <h2 id="edit-title" class="font-bold">Chỉnh sửa tất cả câu hỏi</h2><button type="button" id="close-edit-btn" class="action-btn" title="Đóng"> <i data-lucide="x" class="w-5 h-5"></i> </button>
+    </div>
+    <div class="question-body overflow-y-auto" style="max-height: calc(85 * min(var(--vh, 1vh), 1vh));">
+     <div id="edit-questions-list"></div>
+    </div>
+    <div style="padding: 16px 22px; border-top: 3px solid #172018; display: flex gap-3; justify-content: flex-end;"><button id="save-edits-btn" type="button" class="action-btn" style="background: #315f4e; color: #fff; font-weight: 800;"> <i data-lucide="check" class="w-5 h-5"></i> Lưu thay đổi </button> <button id="cancel-edits-btn" type="button" class="action-btn"> Hủy </button>
+    </div>
+   </section>
+  </div><button id="floating-edit-btn" type="button" class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full border-3 border-[#172018] bg-[#f8c943] shadow-lg flex items-center justify-center hover:scale-110 transition-transform" title="Chỉnh sửa câu hỏi"> <i data-lucide="pencil-ruler" class="w-6 h-6"></i> </button>
+  <div id="site-complete-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="site-complete-title">
+   <section data-template-id="site-complete-card" class="canva-card complete-card" style="background: linear-gradient(135deg, rgb(255, 248, 232), rgb(244, 216, 121));">
+    <div class="house-medal" aria-hidden="true"><i data-lucide="house" class="w-10 h-10"></i>
+    </div>
+    <h2 id="site-complete-title" data-template-id="site-complete-title" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 38px; letter-spacing: -0.04rem;">CĂN NHÀ ĐÃ HOÀN THÀNH!</h2>
+    <p data-template-id="site-complete-message" class="canva-text max-w-2xl mx-auto mt-3" style="color: rgb(59, 73, 59); font-weight: 600; font-style: normal; font-size: 17px;">Bảy hạng mục đều đạt chuẩn. Hãy bàn giao căn nhà này và đưa đội thi công sang công trường kế tiếp.</p>
+    <div class="site-dots" aria-label="Các công trường đã hoàn thành">
+     <span class="site-dot"></span><span class="site-dot"></span><span class="site-dot"></span>
+    </div><button id="next-site-button" type="button" data-template-id="next-site-button" class="canva-button action-btn" style="background: rgb(49, 95, 78); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 17px;">Sang công trường tiếp theo →</button>
+   </section>
+  </div>
+  <div id="final-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="final-title">
+   <section data-template-id="final-card" class="canva-card complete-card" style="background: linear-gradient(135deg, rgb(255, 248, 232), rgb(244, 216, 121));">
+    <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+    <div class="relative z-10">
+     <div class="house-medal" aria-hidden="true"><i data-lucide="trophy" class="w-10 h-10"></i>
+     </div>
+     <h2 id="final-title" data-template-id="final-title" class="canva-text display-font" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 39px; letter-spacing: -0.04rem;">HOÀN THÀNH CẢ 3 CÔNG TRƯỜNG!</h2>
+     <p data-template-id="final-message" class="canva-text max-w-2xl mx-auto mt-3" style="color: rgb(59, 73, 59); font-weight: 600; font-style: normal; font-size: 18px;">Ba kiểu nhà khác nhau đã được xây dựng an toàn và đúng quy trình. Bạn là quản đốc công trường xuất sắc!</p>
+     <div class="flex justify-center gap-4 my-6 text-5xl" aria-label="Ba căn nhà đã hoàn thành">
+      <span>🏡</span><span>🏢</span><span>🏠</span>
+     </div>
+     <div data-template-id="bonus-badge" class="canva-banner inline-flex items-center gap-2 px-5 py-3 border-[3px] border-[#172018] rounded-full shadow-[5px_5px_0_#172018]" style="background: rgb(136, 201, 107);">
+      <i data-lucide="banknote" class="w-7 h-7" aria-hidden="true"></i> <span data-template-id="bonus-text" class="canva-text" style="color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 18px;">THƯỞNG TOÀN ĐỘI: 1.500.000₫</span>
+     </div>
+     <div>
+      <button id="restart-button" type="button" data-template-id="restart-button" class="canva-button action-btn mt-7" style="background: rgb(235, 113, 57); color: rgb(23, 32, 24); font-weight: 800; font-style: normal; font-size: 17px;">↻ Chơi lại từ đầu</button>
+     </div>
+    </div>
+   </section>
+  </div>
+  <script src="/_sdk/719055fef2a85d14.editing_sdk.js" integrity="sha512-kFqrdGgIiTOsu307feB5Cy3JVP9IayftsmCIZ0csxYBGuBmJQPhyvcnmKR8F0fTW97h5s1gAvz3SumI8zJ6OxQ=="></script>
+  <script>
+    const correctAnswers = [1, 2, 0, 3, 1, 2, 0];
+    const itemEmoji = ["🧱", "🏗️", "🔨", "🔧", "🎨", "🏠", "🛋️"];
+    const itemNames = ["Viên gạch", "Thanh sắt", "Búa", "Cờ lê", "Sơn", "Gạch ngói", "Đồ nội thất"];
+    const houseTypes = ["Nhà mái ngói truyền thống", "Nhà phố hiện đại", "Nhà vườn xanh"];
+    const statusMessages = [
+      "Chọn biểu tượng Viên gạch đang phát sáng để bắt đầu đặt móng.",
+      "Móng đã chắc! Chọn Thanh sắt để dựng khung chịu lực.",
+      "Khung đã sẵn sàng. Chọn Búa để cố định các mối ghép.",
+      "Các mối ghép đã ổn. Chọn Cờ lê để siết chặt hệ thống.",
+      "Kết cấu đã an toàn. Chọn Sơn để hoàn thiện bề mặt.",
+      "Tường đã đẹp! Chọn Gạch ngói để hoàn thiện mái.",
+      "Mái đã kín. Chọn Đồ nội thất để hoàn thiện căn nhà."
+    ];
+
+    let currentSite = 0;
+    let completed = 0;
+    let activeQuestion = null;
+    let answeredCorrectly = false;
+    let soundEnabled = true;
+
+    const toolButtons = [...document.querySelectorAll(".material-btn")];
+    const progressSegments = [...document.querySelectorAll(".progress-segment")];
+    const questionSlides = [...document.querySelectorAll(".question-slide")];
+    const houses = [...document.querySelectorAll(".house")];
+    const sitePhotos = [...document.querySelectorAll(".site-photo")];
+    const siteNames = [...document.querySelectorAll(".site-name")];
+    const siteDots = [...document.querySelectorAll(".site-dot")];
+
+    const questionOverlay = document.getElementById("question-overlay");
+    const siteCompleteOverlay = document.getElementById("site-complete-overlay");
+    const finalOverlay = document.getElementById("final-overlay");
+    const successBox = document.getElementById("feedback-success");
+    const errorBox = document.getElementById("feedback-error");
+    const statusDynamic = document.getElementById("status-dynamic");
+    const crew = document.getElementById("crew");
+    const dust = document.getElementById("dust");
+
+    function setBodyLock(locked) {
+      document.body.style.overflow = locked ? "hidden" : "";
+    }
+
+    function openQuestion(index) {
+      activeQuestion = index;
+      answeredCorrectly = false;
+
+      questionSlides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("hidden", slideIndex !== index);
+        slide.querySelectorAll(".answer-btn").forEach(button => {
+          button.disabled = false;
+          button.classList.remove("correct", "wrong");
+        });
+      });
+
+      successBox.classList.add("hidden");
+      errorBox.classList.add("hidden");
+      document.getElementById("question-number").textContent = `Câu ${index + 1} / 7 • Công trường ${currentSite + 1}`;
+      document.getElementById("quiz-item-icon").textContent = itemEmoji[index];
+      questionOverlay.classList.remove("hidden");
+      setBodyLock(true);
+
+      window.setTimeout(() => {
+        questionSlides[index].querySelector(".answer-btn").focus();
+      }, 80);
+    }
+
+    function handleMaterialClick(event) {
+      const index = Number(event.currentTarget.dataset.item);
+      if (index < completed) return;
+
+      if (index !== completed) {
+        event.currentTarget.classList.remove("shake");
+        void event.currentTarget.offsetWidth;
+        event.currentTarget.classList.add("shake");
+        statusDynamic.textContent = `Chưa đến bước ${itemNames[index]}. Hãy nhấn biểu tượng ${itemNames[completed]} đang phát sáng trước nhé!`;
+        return;
+      }
+
+      openQuestion(index);
+    }
+
+    function handleAnswer(event) {
+      if (activeQuestion === null || answeredCorrectly) return;
+      const chosen = Number(event.currentTarget.dataset.answer);
+      const buttons = questionSlides[activeQuestion].querySelectorAll(".answer-btn");
+
+      if (chosen === correctAnswers[activeQuestion]) {
+        answeredCorrectly = true;
+        buttons.forEach(button => { button.disabled = true; });
+        event.currentTarget.classList.add("correct");
+        successBox.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+        document.getElementById("continue-button").focus();
+      } else {
+        event.currentTarget.classList.add("wrong");
+        event.currentTarget.disabled = true;
+        errorBox.classList.remove("hidden");
+        successBox.classList.add("hidden");
+        document.getElementById("retry-button").focus();
+      }
+    }
+
+    function retryQuestion() {
+      const buttons = questionSlides[activeQuestion].querySelectorAll(".answer-btn");
+      buttons.forEach(button => {
+        button.disabled = false;
+        button.classList.remove("wrong");
+      });
+      errorBox.classList.add("hidden");
+      buttons[0].focus();
+    }
+
+    function continueConstruction() {
+      questionOverlay.classList.add("hidden");
+      setBodyLock(false);
+
+      completed += 1;
+      updateProgress();
+      animateConstruction();
+      playConstructionSound();
+
+      if (completed < 7) {
+        statusDynamic.textContent = statusMessages[completed];
+        window.setTimeout(() => toolButtons[completed].focus(), 650);
+      } else {
+        statusDynamic.textContent = `${houseTypes[currentSite]} đã hoàn thành. Đội thi công đang bàn giao công trình!`;
+        window.setTimeout(showSiteComplete, 1200);
+      }
+
+      activeQuestion = null;
+    }
+
+    function updateProgress() {
+      document.getElementById("progress-count").textContent = `${completed} / 7`;
+      document.getElementById("site-progress-text").textContent = `Công trường ${currentSite + 1} / 3`;
+
+      progressSegments.forEach((segment, index) => {
+        segment.classList.toggle("done", index < completed);
+      });
+
+      toolButtons.forEach((button, index) => {
+        button.disabled = index < completed;
+        button.classList.toggle("is-done", index < completed);
+        button.classList.toggle("is-next", index === completed && completed < 7);
+        button.classList.toggle("is-locked", index > completed);
+      });
+
+      houses[currentSite].className = `house ${["traditional", "modern", "garden"][currentSite]} stage-${completed}`;
+    }
+
+    function animateConstruction() {
+      crew.classList.remove("is-building");
+      dust.classList.remove("burst");
+      void crew.offsetWidth;
+      crew.classList.add("is-building");
+      dust.classList.add("burst");
+    }
+
+    function showSiteComplete() {
+      siteDots.forEach((dot, index) => dot.classList.toggle("done", index <= currentSite));
+      siteCompleteOverlay.classList.remove("hidden");
+      setBodyLock(true);
+      document.getElementById("next-site-button").focus();
+    }
+
+    function goToNextSite() {
+      siteCompleteOverlay.classList.add("hidden");
+
+      if (currentSite >= 2) {
+        showFinal();
+        return;
+      }
+
+      currentSite += 1;
+      completed = 0;
+      switchSite();
+      setBodyLock(false);
+      statusDynamic.textContent = statusMessages[0];
+      window.setTimeout(() => toolButtons[0].focus(), 300);
+    }
+
+    function switchSite() {
+      houses.forEach((house, index) => {
+        house.classList.toggle("hidden-house", index !== currentSite);
+        if (index === currentSite) {
+          house.className = `house ${["traditional", "modern", "garden"][index]} stage-0`;
+        }
+      });
+
+      sitePhotos.forEach((photo, index) => photo.classList.toggle("hidden-site", index !== currentSite));
+      siteNames.forEach((name, index) => name.classList.toggle("hidden", index !== currentSite));
+      document.getElementById("house-type").textContent = houseTypes[currentSite];
+      updateProgress();
+    }
+
+    function showFinal() {
+      createConfetti();
+      finalOverlay.classList.remove("hidden");
+      setBodyLock(true);
+      window.setTimeout(() => document.getElementById("restart-button").focus(), 100);
+    }
+
+    function restartGame() {
+      currentSite = 0;
+      completed = 0;
+      activeQuestion = null;
+      answeredCorrectly = false;
+      finalOverlay.classList.add("hidden");
+      siteCompleteOverlay.classList.add("hidden");
+      questionOverlay.classList.add("hidden");
+      siteDots.forEach(dot => dot.classList.remove("done"));
+      houses.forEach((house, index) => {
+        house.className = `house ${["traditional", "modern", "garden"][index]} stage-0${index === 0 ? "" : " hidden-house"}`;
+      });
+      switchSite();
+      statusDynamic.textContent = statusMessages[0];
+      setBodyLock(false);
+      toolButtons[0].focus();
+    }
+
+    function createConfetti() {
+      const layer = document.getElementById("confetti-layer");
+      layer.replaceChildren();
+      const colors = ["#f8c943", "#eb7139", "#7db5c4", "#88c96b", "#c84c37", "#fff8e8"];
+
+      for (let index = 0; index < 36; index += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[index % colors.length];
+        piece.style.animationDelay = `${Math.random() * 2}s`;
+        piece.style.animationDuration = `${2.3 + Math.random() * 1.8}s`;
+        layer.appendChild(piece);
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("sound-button").setAttribute("aria-pressed", String(soundEnabled));
+      document.querySelector(".sound-on-icon").classList.toggle("hidden", !soundEnabled);
+      document.querySelector(".sound-off-icon").classList.toggle("hidden", soundEnabled);
+      document.querySelector(".sound-on-text").classList.toggle("hidden", !soundEnabled);
+      document.querySelector(".sound-off-text").classList.toggle("hidden", soundEnabled);
+    }
+
+    function playConstructionSound() {
+      if (!soundEnabled) return;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      const context = new AudioContextClass();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(180, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(650, context.currentTime + .12);
+      gain.gain.setValueAtTime(.16, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.01, context.currentTime + .16);
+      oscillator.start();
+      oscillator.stop(context.currentTime + .16);
+    }
+
+    function openEditModal() {
+      const editList = document.getElementById("edit-questions-list");
+      editList.replaceChildren();
+
+      const questions = [
+        { prefix: "q1", text: document.querySelector('[data-template-id="q1-question"]').textContent },
+        { prefix: "q2", text: document.querySelector('[data-template-id="q2-question"]').textContent },
+        { prefix: "q3", text: document.querySelector('[data-template-id="q3-question"]').textContent },
+        { prefix: "q4", text: document.querySelector('[data-template-id="q4-question"]').textContent },
+        { prefix: "q5", text: document.querySelector('[data-template-id="q5-question"]').textContent },
+        { prefix: "q6", text: document.querySelector('[data-template-id="q6-question"]').textContent },
+        { prefix: "q7", text: document.querySelector('[data-template-id="q7-question"]').textContent }
+      ];
+
+      questions.forEach((q, idx) => {
+        const section = document.createElement("div");
+        section.style.marginBottom = "24px";
+        section.style.paddingBottom = "20px";
+        section.style.borderBottom = "2px solid #e5e7eb";
+
+        section.innerHTML = `
+          <h3 style="font-weight: 800; margin-bottom: 12px; color: #172018;">Câu ${idx + 1}</h3>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #172018; margin-bottom: 6px;">Câu hỏi:</label>
+            <textarea id="edit-q${idx + 1}" style="width: 100%; padding: 10px; border: 2px solid #172018; border-radius: 8px; font-family: inherit; font-size: 14px;" rows="3">${q.text}</textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #172018; margin-bottom: 6px;">A:</label>
+              <input type="text" id="edit-${q.prefix}-a" style="width: 100%; padding: 10px; border: 2px solid #172018; border-radius: 8px; font-size: 14px;" value="${document.querySelector(`[data-template-id="${q.prefix}-a"]`).textContent}">
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #172018; margin-bottom: 6px;">B:</label>
+              <input type="text" id="edit-${q.prefix}-b" style="width: 100%; padding: 10px; border: 2px solid #172018; border-radius: 8px; font-size: 14px;" value="${document.querySelector(`[data-template-id="${q.prefix}-b"]`).textContent}">
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #172018; margin-bottom: 6px;">C:</label>
+              <input type="text" id="edit-${q.prefix}-c" style="width: 100%; padding: 10px; border: 2px solid #172018; border-radius: 8px; font-size: 14px;" value="${document.querySelector(`[data-template-id="${q.prefix}-c"]`).textContent}">
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #172018; margin-bottom: 6px;">D:</label>
+              <input type="text" id="edit-${q.prefix}-d" style="width: 100%; padding: 10px; border: 2px solid #172018; border-radius: 8px; font-size: 14px;" value="${document.querySelector(`[data-template-id="${q.prefix}-d"]`).textContent}">
+            </div>
+          </div>
+        `;
+        editList.appendChild(section);
+      });
+
+      document.getElementById("edit-overlay").classList.remove("hidden");
+      setBodyLock(true);
+    }
+
+    function saveEdits() {
+      for (let i = 1; i <= 7; i++) {
+        const qPrefix = `q${i}`;
+        const newQuestion = document.getElementById(`edit-q${i}`)?.value || "";
+        
+        if (newQuestion) {
+          document.querySelector(`[data-template-id="${qPrefix}-question"]`).textContent = newQuestion;
+        }
+
+        ["a", "b", "c", "d"].forEach(letter => {
+          const input = document.getElementById(`edit-${qPrefix}-${letter}`);
+          if (input?.value) {
+            document.querySelector(`[data-template-id="${qPrefix}-${letter}"]`).textContent = input.value;
+          }
+        });
+      }
+
+      document.getElementById("edit-overlay").classList.add("hidden");
+      setBodyLock(false);
+    }
+
+    function closeEdit() {
+      document.getElementById("edit-overlay").classList.add("hidden");
+      setBodyLock(false);
+    }
+
+    toolButtons.forEach(button => button.addEventListener("click", handleMaterialClick));
+    document.querySelectorAll(".answer-btn").forEach(button => button.addEventListener("click", handleAnswer));
+    document.getElementById("retry-button").addEventListener("click", retryQuestion);
+    document.getElementById("continue-button").addEventListener("click", continueConstruction);
+    document.getElementById("next-site-button").addEventListener("click", goToNextSite);
+    document.getElementById("restart-button").addEventListener("click", restartGame);
+    document.getElementById("sound-button").addEventListener("click", toggleSound);
+    document.getElementById("floating-edit-btn").addEventListener("click", openEditModal);
+    document.getElementById("close-edit-btn").addEventListener("click", closeEdit);
+    document.getElementById("cancel-edits-btn").addEventListener("click", closeEdit);
+    document.getElementById("save-edits-btn").addEventListener("click", saveEdits);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      updateProgress();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1b046f9d7690671',t:'MTc4NDAyOTQ4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body></html>
